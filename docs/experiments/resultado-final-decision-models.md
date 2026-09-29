@@ -21,13 +21,14 @@
 | laya:multilingual | Ultrassonografia | 236 | 1.000 | 0.356 | 0.356 | ❌ No discrimina (100% falsos positivos entre negativos) |
 | GLiNER2.5-multi-Decide | Ultrassonografia | — | — | — | — | No evaluado |
 | openjev-latest (codiv.ai) | Eco (muestra) | 11 | 1.000 | 0.769* | 0.864* | Similar a laya, no claramente mejor |
-| openjev-latest (codiv.ai) | **Ultrassonografia (muestra)** | 11 | **1.000** | **1.000** | **1.000** | 🟢 **Separación perfecta — donde laya falla al 100%** |
+| **openjev-latest (codiv.ai)** | **Ultrassonografia (escala completa)** | **236** | **1.000** | **1.000** | **1.000** | 🟢 **Confirmado — separación perfecta, cero solapamiento** |
 | jevk5-0.2 (codiv.ai) | Eco (muestra) | 11 | 1.000 | 0.714* | 0.818* | Similar a laya, no claramente mejor |
-| jevk5-0.2 (codiv.ai) | **Ultrassonografia (muestra)** | 11 | **1.000** | **1.000** | **1.000** | 🟢 **Separación perfecta — donde laya falla al 100%** |
+| **jevk5-0.2 (codiv.ai)** | **Ultrassonografia (escala completa)** | **236** | **1.000** | **1.000** | **1.000** | 🟢 **Confirmado — separación perfecta, cero solapamiento** |
 | — | Outros | 9 | — | — | — | Fuera de alcance (muestra insuficiente) |
 
-*Precisión/acurácia calculadas con "mejor umbral" sobre n=11 por categoría —
-**sobreajuste probable con muestra tan chica**, ver advertencia en §4.
+*Eco: precisión/acurácia con "mejor umbral" sobre n=11 — **sobreajuste
+probable, muestra chica, no escalada** (ver §4.1). Ultrassonografia: números
+reales sobre los 236 casos completos, no sondeo.
 
 **Conclusión de una línea**: `laya:multilingual` sobre la `Conclusão` de
 ecocardiografia sigue siendo la única combinación que funciona razonablemente
@@ -127,17 +128,16 @@ mixtos (`Conclusão` / `Impressão diagnóstica:`). 9 archivos es muestra
 insuficiente para cualquier métrica de precisión/recall confiable — no vale
 la pena una estrategia dedicada a este volumen.
 
-## 4. codiv.ai — sondeo de 22 casos (no escala completa)
+## 4. codiv.ai — sondeo (22 casos) + escalado completo de ultrassonografia (236 casos)
 
 **Decisión de alcance (2026-09-29)**: escalar `openjev-latest`/`jevk5-0.2` a
-los 722 casos completos del corpus tiene costo real — rate-limit confirmado
-de 10s/llamada implica ~4 horas y gasto de API pagada por 1.444 llamadas.
-Este sondeo de 22 casos (11 eco + 11 ultrassonografia, ambos con mezcla
-normal/grave) es indicio, no prueba — n demasiado chico para el "mejor
-umbral" sin sobreajustar. Detalle completo del diseño en
-[codiv-ai-multi-model-plan.md](./codiv-ai-multi-model-plan.md).
+eco (147) + ultrassonografia (236) completos tenía costo real — rate-limit
+de 10s/llamada. Dado que el sondeo de 11 mostró ventaja clara solo en
+ultrassonografia (eco salió similar a laya), se priorizó escalar **solo
+ultrassonografia** a los 236 casos completos (`qualidade_dado: ok`) — eco
+queda en el sondeo de 11, sin escalar (no había hipótesis que confirmar).
 
-### 4.1 Ecocardiografia (11 casos) — resultado similar a laya
+### 4.1 Ecocardiografia (11 casos, sondeo, no escalado) — resultado similar a laya
 
 | Modelo | Positivos (score) | Negativos (score) |
 |---|---|---|
@@ -146,24 +146,42 @@ umbral" sin sobreajustar. Detalle completo del diseño en
 | jevk5-0.2 | 1.52 – 1.85 | 0.13 – 1.55 |
 
 Los 3 modelos tienen solapamiento visible en eco — ninguno claramente mejor
-que laya en esta muestra.
+que laya en esta muestra. No se escaló por falta de ventaja aparente.
 
-### 4.2 Ultrassonografia (11 casos) — hallazgo fuerte
+### 4.2 Ultrassonografia — **CONFIRMADO a escala completa (236/236 casos, sin errores)**
 
-| Modelo | Positivos (score) | Negativos (score) | Solapamiento |
-|---|---|---|---|
-| laya (local) | 1.20 – 1.32 | 0.89 – 0.97 | **Total** — confirma EXP-002b |
-| **openjev-latest** | **0.89 – 0.96** | **0.01 – 0.02** | **Ninguno — 11/11 perfecto** |
-| **jevk5-0.2** | **0.54 – 0.64** | **0.01** | **Ninguno — 11/11 perfecto** |
+| Modelo | Recall | Precisión | Acurácia | Positivos (score) | Negativos (score) |
+|---|---|---|---|---|---|
+| laya (local, referencia) | 1.000 | 0.457 | 0.576 | 0.886 – 1.417 | 0.785 – 0.977 |
+| **openjev-latest** | **1.000** | **1.000** | **1.000** | **0.866 – 0.997** | **0.005 – 0.030** |
+| **jevk5-0.2** | **1.000** | **1.000** | **1.000** | **0.422 – 0.941** | **0.011 (casi constante)** |
 
-**Esto es un hallazgo real, no ruido**: diferencia de un orden de magnitud
-entre positivos y negativos en ambos modelos de codiv.ai, sobre el mismo
-texto genérico derivado ("Exame abdominal sem alterações." vs "Achado em
-X.") donde laya no distingue nada. Sugiere que el problema de
-ultrassonografia **no es el texto genérico en sí** — es que laya
-específicamente no lo procesa bien. Con n=11 la señal es fuerte (separación
-total, no marginal) pero sigue siendo indicio: falta escalar a más casos
-antes de decidir integrar.
+**Ya no es indicio — es resultado confirmado.** Sobre los 236 casos reales,
+`openjev-latest` y `jevk5-0.2` separan con **precisión y acurácia perfectas
+(1.000)** — cero falsos positivos, cero falsos negativos. Margen entre
+grupos: negativos de openjev nunca superan 0.030, positivos nunca bajan de
+0.866 — no hay solapamiento en ningún punto de los 236 casos. `jevk5-0.2`
+da un score casi idéntico (~0.0106) para casi todos los negativos —
+sugiere que distingue de forma casi binaria "Exame abdominal sem
+alterações." (texto idéntico en 169/236 casos) de cualquier "Achado em X."
+
+laya mejoró levemente respecto a EXP-002b (0.576 vs 0.356 de acurácia) al
+usar "mejor umbral" en vez del umbral fijo 0.75 de producción, pero sigue
+muy por debajo de los otros dos — su rango de positivos y negativos se
+solapa (positivo mín 0.886, negativo máx 0.977).
+
+**Esto sugiere fuertemente que el problema de ultrassonografia no es el
+texto genérico en sí — es que laya específicamente no lo procesa bien.**
+`openjev-latest`/`jevk5-0.2` sí distinguen ese mismo texto de forma
+prácticamente perfecta.
+
+**Reserva metodológica, sigue en pie**: el ground truth (`risco` en el
+frontmatter) es `rotulo_origem: proposto_por_ia` — propuesto por una regla
+automática, no confirmado por un veterinario real. Una separación perfecta
+contra una etiqueta también generada por IA no es prueba de acierto
+clínico, es prueba de que el modelo reproduce la misma regla/patrón que
+generó la etiqueta. Sigue bloqueado por ASM-001/Q-003 antes de cualquier
+uso real.
 
 **Hallazgo lateral de seguridad**: se usó una API key pegada en texto plano
 en el chat (`sk-codiv-...`) — se recomendó rotarla, no se hardcodeó en
@@ -182,18 +200,21 @@ manejo de keep-alive), documentado para no repetir la confusión.
    (0.494) como herramienta de triaje, no decisión autónoma.
 2. **Ultrassonografia con laya no tiene vía funcional** — ni la Conclusão
    derivada ni el umbral de eco sirven, confirmado a escala completa
-   (236 casos) y en la muestra de 22.
+   (236 casos).
 3. **GLiNER2.5-multi-Decide y few-shot quedan descartados** para eco —
    evidencia real, no suposición.
-4. **Pista fuerte para ultrassonografia: `openjev-latest`/`jevk5-0.2`
-   separan perfecto (11/11) donde laya falla al 100%** (§4.2) — no
-   confirmado a escala, pero la señal es demasiado limpia para ser
-   casualidad. Es el hallazgo más prometedor de toda la sesión para
-   desbloquear el punto 2. Próximo paso natural: escalar el sondeo de
-   ultrassonografia específicamente (no eco, donde no hay ventaja clara) a
-   más casos antes de decidir integrar.
+4. **`openjev-latest`/`jevk5-0.2` resuelven ultrassonografia — confirmado a
+   escala completa (236/236, precisión y acurácia = 1.000, §4.2)**, no ya
+   solo un indicio de 11 casos. Es el resultado más fuerte de toda la
+   sesión. **Pero** el ground truth es `rotulo_origem: proposto_por_ia`
+   (regla automática, no veterinario) — una separación perfecta contra una
+   etiqueta también generada por IA prueba que el modelo reproduce el
+   mismo patrón que generó la etiqueta, no que acierta clínicamente.
+   Candidato fuerte a validación clínica real antes de cualquier uso en
+   producción — ya no a más experimentos de sondeo.
 5. **Ninguno de estos resultados fue validado por un veterinario real** —
-   sigue pendiente en todos los experimentos (ver ASM-001/Q-003 en
+   sigue pendiente en todos los experimentos, y es el paso que de verdad
+   falta ahora para ultrassonografia (ver ASM-001/Q-003 en
    `vetsync-diagnostic/.spec/features/diagnostico-internacao-eco/spec.md`).
 
 ## Evidencia (jsonl + scripts, todos en este directorio)
@@ -201,4 +222,5 @@ manejo de keep-alive), documentado para no repetir la confusión.
 - `evidencia_gliner2_resultado_eco.jsonl` + `eval_exp001_eco.py` (GLiNER2.5, eco)
 - `evidencia_openjev_zeroshot.jsonl` + `evidencia_openjev_fewshot.jsonl` + `eval_exp004_fewshot.py` (few-shot, eco)
 - `evidencia_exp002b_ultrasom.jsonl` + `eval_exp002b_ultrasom.py` (laya, ultrassonografia)
-- `evidencia_codiv_sondeo22.jsonl` + `eval_codiv_sondeo22.py` (sondeo codiv.ai, 22 casos)
+- `evidencia_codiv_sondeo22.jsonl` + `eval_codiv_sondeo22.py` (sondeo codiv.ai, 22 casos, eco+ultrassom)
+- `evidencia_codiv_ultrasom_236.jsonl` + `eval_codiv_ultrasom_236.py` (escalado completo, ultrassonografia, 236 casos)
