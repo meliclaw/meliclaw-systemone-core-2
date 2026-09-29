@@ -207,14 +207,48 @@ por pregunta (`noul` = sí/no, `score` = nivel ordinal, `choice` = categoría co
 confianza). Esto es "prompting" en el sentido de: el diseño del texto de
 `instructions`/`criteria` es lo único que se ajusta — nunca los pesos.
 
-### 3.2 Few-shot (dónde entraría, si hiciera falta)
+### 3.2 Few-shot — probado, EXP-004, resultado negativo (2026-09-29)
 
-Ni laya ni GLiNER2.5 usan ejemplos en el prompt en la implementación actual
-(zero-shot puro: solo instrucciones, sin ejemplos resueltos). Few-shot real
-significaría incluir 1-3 casos ya resueltos como contexto en `state` —
-**no se hizo en ningún experimento hasta ahora**, es una palanca sin probar,
-no una técnica ya aplicada. Si la precisión no mejora con calibración de
-umbral sola, es el siguiente experimento razonable, no fine-tuning.
+Probado vía el paquete `laya` nativo (mismo checkpoint `laya-multilingual`,
+sin pasar por Ollaya), 2 ejemplos fijos (uno normal, uno grave) prependidos al
+texto real, mismo formato de `state` que usa producción. Sobre 147 casos
+(147 = 149 − los 2 usados como ejemplos):
+
+| | Zero-shot | Few-shot (2 ejemplos) |
+|---|---|---|
+| Mediana positivos | 1.859 | 1.875 |
+| Mediana negativos | 0.969 | **1.853** (casi igual a positivos) |
+| Precisión (recall=1.0) | 0.333 | **0.274** |
+| Acurácia | 0.456 | **0.279** |
+
+**Few-shot empeora, no mejora.** Prependear ejemplos destruye la separación
+entre grupos — la mediana de "no interna" salta de 0.969 a 1.853. Con un
+encoder de clasificación (no generativo), no hay mecanismo de "aprender del
+ejemplo" en una sola pasada — el texto extra solo diluye la lectura de
+marcadores. **No usar few-shot con laya.**
+
+Nota: estos números zero-shot (0.456/0.333) no coinciden con los de Fase 7 en
+producción (0.718/0.494) — acá se mandó solo la pregunta `gravidade`, en
+producción se mandan 3 preguntas juntas (`internacao`+`gravidade`+`causa_provavel`)
+en el mismo request. Esa diferencia de payload probablemente explica el
+corrimiento — no invalida la comparación few-shot vs zero-shot (mismo método
+en ambos brazos), pero significa que estos números absolutos no reemplazan
+los de Fase 7.
+
+Evidencia: `evidencia_openjev_zeroshot.jsonl`, `evidencia_openjev_fewshot.jsonl`,
+script `eval_exp004_fewshot.py`.
+
+### 3.2.1 Hallazgo lateral: el formato de `state` cambia el resultado
+
+Mismo texto ("Nada digno de nota."), mismo checkpoint, mismo runtime —
+mandado como string plano da `gravidade=1.64`; envuelto en
+`{"numero_relatorio":..., "laudo":...}` (formato real del Rust en producción)
+da `gravidade=0.65`. El campo `numero_relatorio` dentro del JSON afecta lo que
+el modelo "lee" como contenido clínico. Verificado en vivo contra el endpoint
+real de Ollaya (`localhost:18135`), no es un artefacto del paquete Python.
+Implicación: cualquier cambio futuro en cómo se arma `state` (agregar campos,
+cambiar claves) puede correr el umbral de decisión sin que nadie lo note —
+digno de un test de regresión, no solo de un valor fijo hardcodeado.
 
 ### 3.3 Por qué no fine-tuning
 
@@ -345,7 +379,7 @@ veterinario original.
 | ~~EXP-001~~ | **Resuelta 2026-09-29**: GLiNER2.5-multi-Decide sobre los mismos 149 casos de eco pierde contra laya (precisión 0.277 vs 0.494, acurácia 0.282 vs 0.718, mismo recall=1.000). No se integra. Evidencia: `evidencia_gliner2_resultado_eco.jsonl`, script `convert/ollaya_convert/families/gliner2/eval_exp001_eco.py`. | Cerrada |
 | EXP-002b | Con la Conclusão derivada (§6) ya disponible en los 254 de ultrassonografia, ¿laya (o GLiNER2.5) discrimina bien `risco: baixo` vs `moderado` sobre ese texto genérico ("Achado em rins.")? No medido — el texto derivado es deliberadamente pobre en detalle, puede no alcanzar para discriminar | Bloquea cualquier feature de decisión sobre ultrassonografia — no empezado |
 | EXP-003 | Outros (9 casos, headers mixtos) — ¿vale la pena una estrategia dedicada para 9 archivos, o se descarta la categoría? | No empezado, probablemente descartable por volumen |
-| EXP-004 | Few-shot (§3.2) sin probar — si EXP-001 no mejora la precisión, ¿siguiente paso es few-shot o recolectar ground truth clínico real? | Depende del resultado de EXP-001 |
+| ~~EXP-004~~ | **Resuelta 2026-09-29**: few-shot (§3.2) empeora la discriminación de laya (acurácia 0.279 vs 0.456 zero-shot, mismo método). No usar. | Cerrada |
 
 Todas las preguntas ASM/Q de la feature de eco en producción
 (`vetsync-diagnostic/.spec/features/diagnostico-internacao-eco/spec.md`) siguen
