@@ -1,9 +1,11 @@
 # Experimento: GLiNER2.5-multi-Decide vs laya no corpus real de ecocardiogramas
 
-- **Status:** planejado, não executado. Revisado em 2026-09-29 — a v1 deste
-  documento tinha o modelo errado (inglês) e a arquitetura errada (assumia um
-  head simples de 4 tensores). Corrigido abaixo com dados confirmados na fonte
-  oficial (Hugging Face API + README, não o pacote colado na conversa).
+- **Status:** **executado e fechado em 2026-09-29. Resultado: NÃO integrar.**
+  GLiNER2.5-multi-Decide perdeu de laya:multilingual nos 149 casos reais de
+  eco: precisão 0.277 vs 0.494, acurácia 0.282 vs 0.718 (mesmo recall=1.000).
+  Ver §"Resultado" no final deste documento. As correções de v1→v2 abaixo
+  (modelo certo, arquitetura real) continuam válidas como registro do que foi
+  corrigido no caminho.
 - **Objetivo:** decidir se vale a pena integrar um modelo `GLiNER2.5` como
   família nova do Ollaya, comparando contra `laya:multilingual` **no mesmo
   corpus real** já usado na Fase 7 de `vetsync-diagnostic` — não no benchmark
@@ -163,3 +165,41 @@ de integrar.
 - Treinar/ajustar o GLiNER2.5 — só inferência do checkpoint público.
 - Validação clínica do resultado por veterinário — mesma ressalva já registrada
   para laya (ASM-001/Q-003 em `vetsync-diagnostic`).
+
+## Resultado (Fases 1-3 executadas, 2026-09-29)
+
+Setup: `pip install "gliner2[local]" "transformers>=5" protobuf sentencepiece`
+(venv isolado). `transformers` 4.x quebra o load do tokenizer (bug de
+`extra_special_tokens`) — precisa 5.x, que é o que o `encoder_config` do
+modelo já declarava.
+
+| Métrica | laya:multilingual | GLiNER2.5-multi-Decide |
+|---|---|---|
+| Recall (limiar com recall=1.0 obrigatório) | 1.000 | 1.000 |
+| Precisão nesse limiar | 0.494 | **0.277** |
+| Acurácia | 0.718 | **0.282** |
+| Latência CPU p50/p95 | ~1-2s e2e (medido em produção, via HTTP) | **129ms / 332ms** (in-process, sem rede) |
+| Erros de execução | 0/149 | 0/149 |
+
+Achado adicional: o `score_sim` (probabilidade de "sim"/internar) máximo entre
+os 41 casos que realmente precisavam internar foi **0.493** — nunca cruza o
+limiar padrão de 0.5 da própria lib. O modelo nunca está "confiante" em
+recomendar internação, nem nos casos graves. A sobreposição entre os grupos
+esperado-interna (mediana 0.350) e esperado-não-interna (mediana 0.274) é
+maior, proporcionalmente, que a do laya.
+
+Latência é o único eixo onde GLiNER2.5 ganha (bem — ~10x mais rápido, e
+in-process, sem round-trip HTTP), mas não compensa perder tanto em precisão e
+acurácia numa decisão clínica.
+
+### Critério de decisão — avaliado
+
+1. Recall ≥ 1.000 — ✅ passa.
+2. Precisão melhor que 0.494 — ❌ **falha** (0.277).
+3. Latência aceitável — ✅ passa (é a única vantagem).
+
+**Falhou o critério 2. Não avança para a Fase 4. GLiNER2.5-multi-Decide não é
+integrado ao Ollaya nem ao vetsync-diagnostic.**
+
+Evidência: `evidencia_gliner2_resultado_eco.jsonl` (149 linhas, uma por caso),
+script `convert/ollaya_convert/families/gliner2/eval_exp001_eco.py`.

@@ -49,7 +49,14 @@ Fonte: `meliclaw-systemone-core-2/docs/api.md` (specs verificadas contra a API r
 | Parâmetros | 322M | 287.4M |
 | Calibrado | Sim | Não |
 | Benchmark do fornecedor (`fast-decisions`, genérico, não é nosso domínio) | Laya Router: 46.6% | 56.7% |
-| Validado no nosso domínio (eco, 149 casos reais) | Sim — recall=1.000, precisão=0.494, acurácia=0.718 | Não — pendente (ver experimento) |
+| Validado no nosso domínio (eco, 149 casos reais, EXP-001, 2026-09-29) | Sim — recall=1.000, precisão=0.494, acurácia=0.718 | Sim — recall=1.000, **precisão=0.277**, **acurácia=0.282** — perde |
+
+**Resultado do EXP-001 (executado)**: no nosso domínio real, GLiNER2.5-multi-Decide
+tem precisão e acurácia piores que laya, apesar do benchmark genérico
+favorável (56.7% vs 46.6%). O `score_sim` máximo entre os 41 casos que
+realmente precisavam internar é 0.493 — nunca cruza 0.5, o modelo nunca está
+"seguro" em nenhum caso grave. **Não passa no critério de decisão — não é
+integrado.**
 
 ---
 
@@ -339,7 +346,7 @@ original.
 
 | ID | Pergunta | Bloqueia |
 |---|---|---|
-| EXP-001 | GLiNER2.5-multi-Decide sobre os mesmos 149 casos de eco — ganha do laya em precisão, mantendo recall=1.000? | Ver `gliner2-decide-vs-laya-eco.md`, Fase 1, não executada |
+| ~~EXP-001~~ | **Resolvida em 2026-09-29**: GLiNER2.5-multi-Decide sobre os mesmos 149 casos de eco perde do laya (precisão 0.277 vs 0.494, acurácia 0.282 vs 0.718, mesmo recall=1.000). Não é integrado. Evidência: `evidencia_gliner2_resultado_eco.jsonl`, script `convert/ollaya_convert/families/gliner2/eval_exp001_eco.py`. | Fechada |
 | EXP-002b | Com a Conclusão derivada (§6) já disponível nos 254 de ultrassonografia, laya (ou GLiNER2.5) discrimina bem `risco: baixo` vs `moderado` sobre esse texto genérico ("Achado em rins.")? Não medido — o texto derivado é deliberadamente pobre em detalhe, pode não bastar para discriminar | Bloqueia qualquer feature de decisão sobre ultrassonografia — não começado |
 | EXP-003 | Outros (9 casos, headers mistos) — vale a pena uma estratégia dedicada para 9 arquivos, ou se descarta a categoria? | Não começado, provavelmente descartável por volume |
 | EXP-004 | Few-shot (§3.2) sem testar — se EXP-001 não melhorar a precisão, o próximo passo é few-shot ou coletar ground truth clínico real? | Depende do resultado de EXP-001 |
