@@ -1,8 +1,5 @@
 <p align="center">
-  <picture>
-    <source media="(prefers-color-scheme: dark)" srcset="site/public/static/logo-white.svg">
-    <img src="site/public/static/logo.svg" alt="" width="88">
-  </picture>
+  <img src="site/public/static/logo-meliclaw.png" alt="" width="88">
 </p>
 
 <h1 align="center">Meliclaw System One Core 2</h1>
