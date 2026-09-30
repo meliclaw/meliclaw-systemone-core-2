@@ -5,7 +5,7 @@
   </picture>
 </p>
 
-<h1 align="center">ollaya</h1>
+<h1 align="center">Meliclaw System One Core 2</h1>
 
 <p align="center"><strong>Run open decision models locally, the way Ollama runs LLMs.</strong></p>
 
@@ -19,7 +19,7 @@
 
 A decision model reads a *state* (a message, an email, a ticket, any JSON) plus typed questions
 (`choice`, `score`, `noul`) and returns calibrated probabilities in a single forward pass, in
-milliseconds. It never generates text. Ollaya pulls these models by name, serves them from a
+milliseconds. It never generates text. Meliclaw System One Core 2 pulls these models by name, serves them from a
 local daemon, and speaks TypeSafe's `/v1/systemone` wire format, so existing Jev clients work by
 changing one environment variable.
 
@@ -52,10 +52,10 @@ numbers: [ollaya.dev/search](https://ollaya.dev/search).
 - **Native API.** `/api/decide` adds routing information and timings. `/api/pull` streams
   NDJSON progress, and there are `/api/tags`, `/api/show`, `/api/ps` and more. See
   [docs/api.md](docs/api.md).
-- **Weights come from their authors.** Ollaya publishes only small ONNX graphs, about 3 MB each.
+- **Weights come from their authors.** Meliclaw System One Core 2 publishes only small ONNX graphs, about 3 MB each.
   These graphs read the original weight files (usually `model.safetensors`) from the author's
   Hugging Face repository, pinned to a commit and verified by sha256. Models whose authors publish
-  GGUF files (`winnow`, `jevk5`) run that file itself on llama.cpp. Ollaya never re-hosts weights.
+  GGUF files (`winnow`, `jevk5`) run that file itself on llama.cpp. Meliclaw System One Core 2 never re-hosts weights.
 - **For agents.** `ollaya mcp` serves the models to Claude Code, Claude Desktop, Cursor and other
   MCP clients (`claude mcp add ollaya -- ollaya mcp`), and the
   [`ollaya-decisions` skill](skills/ollaya-decisions/SKILL.md) teaches agents when and how to use
@@ -151,7 +151,7 @@ Apache-2.0. Each model keeps its own license: `laya` (Convai Innovations), `deci
 `kev` (Jared Palmer, on Qwen3.5 by the Qwen team), `decision` (the vLLM Semantic Router
 contributors, on Qwen3.5), `qwen3guard` (Qwen team), `gliclass` (Knowledgator), `von` (Victor Hugo
 Panisa), `winnow` (EldanRing, on Gemma 4 by Google DeepMind), `jevk5` (alibiserikbay, on Qwen3.5)
-and `nli:modernbert-large` are Apache-2.0, and `nli:deberta-v3-large` (Moritz Laurer) is MIT. llama.cpp, which Ollaya ships for
+and `nli:modernbert-large` are Apache-2.0, and `nli:deberta-v3-large` (Moritz Laurer) is MIT. llama.cpp, which Meliclaw System One Core 2 ships for
 GGUF models, is MIT.
 
-Ollaya is an independent project. It is not affiliated with or endorsed by Ollama or TypeSafe.
+Meliclaw System One Core 2 is a fork repo of Ollaya and an independent project. It is not affiliated with or endorsed by Ollama or TypeSafe.
