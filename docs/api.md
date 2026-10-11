@@ -1557,6 +1557,7 @@ These are the variables that change API behaviour.
 | `OLLAYA_REGISTRY` | `ollaya.dev` | Default registry host in names |
 | `OLLAYA_LOG` | `info` | Log levels, a [tracing filter](https://docs.rs/tracing-subscriber/latest/tracing_subscriber/filter/struct.EnvFilter.html): `debug` logs every request with its status and duration |
 | `OLLAYA_LOG_DIR` | unset | Log to `<dir>/server.log` instead of stderr (created if missing; appended, never rotated) |
+| `OPENROUTER_API_KEY` | unset | Enables the OpenRouter-backed remote models (`meliclaw-decision-pplx:27b`, `meliclaw-decision-msd:27b`, `meliclaw-decision-ld1:27b`): listed in `/api/tags`/`/v1/models`/`/api/show`, answered through `/api/decide`/`/v1/systemone` by proxying [OpenRouter's Decisions API](https://openrouter.ai/api/alpha/decisions). Unset, they are hidden and unanswerable; `/api/pull` and `/api/delete` always reject them, since there is nothing local to fetch or remove. |
 
 ## 16. Verification checklist
 

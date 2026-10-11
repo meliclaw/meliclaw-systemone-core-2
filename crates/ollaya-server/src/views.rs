@@ -14,6 +14,7 @@ use serde_json::{Value, json};
 
 use crate::Error;
 use crate::models::{Resolved, resolve};
+use crate::remote::RemoteModel;
 use crate::scheduler::RunningInfo;
 use crate::service::{DecideOutput, ModelInfo};
 
@@ -108,6 +109,59 @@ pub fn local_model(store: &Store, e: &Entry) -> LocalModel {
         size: e.manifest.total_size(),
         digest: bare(&e.digest),
         details: details(store, &e.manifest),
+    }
+}
+
+/// An OpenRouter-backed remote model, rendered as `/api/tags` would an on-disk one.
+pub fn remote_model(r: &RemoteModel) -> LocalModel {
+    LocalModel {
+        name: r.name.to_owned(),
+        model: r.name.to_owned(),
+        modified_at: utc(SystemTime::now()),
+        size: 0,
+        digest: r.openrouter_id.to_owned(),
+        details: ModelDetails {
+            parent_model: String::new(),
+            format: "remote".into(),
+            families: vec![r.family.to_owned()],
+            family: r.family.to_owned(),
+            parameter_size: r.parameter_size.to_owned(),
+            quantization_level: String::new(),
+        },
+    }
+}
+
+/// An OpenRouter-backed remote model, rendered as `/v1/models` would an on-disk one.
+pub fn remote_metadata(r: &RemoteModel) -> ModelMetadata {
+    ModelMetadata {
+        name: r.name.to_owned(),
+        description: r.description.to_owned(),
+        release_date: utc(SystemTime::now()).format("%Y-%m-%d").to_string(),
+    }
+}
+
+/// An OpenRouter-backed remote model, rendered as `/api/show` would an on-disk one.
+pub fn remote_show(r: &RemoteModel) -> ShowResponse {
+    ShowResponse {
+        license: String::new(),
+        modelfile: format!(
+            "# {} answers via OpenRouter ({})\nFROM {}\n",
+            r.name, r.openrouter_id, r.name
+        ),
+        parameters: String::new(),
+        questions: None,
+        router: None,
+        details: ModelDetails {
+            parent_model: String::new(),
+            format: "remote".into(),
+            families: vec![r.family.to_owned()],
+            family: r.family.to_owned(),
+            parameter_size: r.parameter_size.to_owned(),
+            quantization_level: String::new(),
+        },
+        model_info: IndexMap::new(),
+        capabilities: ["choice", "score", "noul"].map(String::from).to_vec(),
+        modified_at: utc(SystemTime::now()),
     }
 }
 

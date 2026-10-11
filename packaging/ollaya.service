@@ -6,6 +6,7 @@
 #   Environment="OLLAYA_KEEP_ALIVE=30m"
 #   Environment="OLLAYA_LOG=debug"
 #   Environment="OLLAYA_LOG_DIR=/var/log/ollaya"
+#   Environment="OPENROUTER_API_KEY=sk-or-v1-..."
 #   LogsDirectory=ollaya
 [Unit]
 Description=Ollaya Service

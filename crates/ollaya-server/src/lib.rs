@@ -4,6 +4,7 @@ pub mod config;
 pub mod http;
 pub mod launch;
 pub mod models;
+pub mod remote;
 pub mod scheduler;
 pub mod service;
 mod views;
