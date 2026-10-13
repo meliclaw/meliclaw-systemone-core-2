@@ -51,7 +51,7 @@ export function Layout({ origin, path, meta, children }: LayoutProps) {
         <meta property="og:image" content={ogImage} />
         <meta property="og:image:width" content="1200" />
         <meta property="og:image:height" content="630" />
-        <meta property="og:image:alt" content={meta.ogImage && meta.title ? `${meta.title} on Ollaya` : 'Ollaya: run decision models locally'} />
+        <meta property="og:image:alt" content={meta.ogImage && meta.title ? `${meta.title} on Meliclaw Systems One Model 2` : 'Meliclaw Systems One Model 2: run decision models locally'} />
         <meta name="twitter:card" content="summary_large_image" />
         <meta name="twitter:image" content={ogImage} />
         <link rel="icon" href="/favicon.svg" type="image/svg+xml" />

@@ -1,5 +1,5 @@
 /**
- * Ollaya's mark: a minimal line-art owl (original artwork). Monochrome: inherits currentColor,
+ * Meliclaw Systems One Model 2 mark: a minimal line-art owl (original artwork). Monochrome: inherits currentColor,
  * so it works on light and dark backgrounds, from 16px favicons to the large closer section.
  * Keep in sync with public/favicon.svg and public/static/logo.svg.
  */
@@ -43,11 +43,11 @@ export function Logo() {
       {/* The owl sits 5px inside its 28px box; pull it out so its edge lines up with the page. */}
       <LogoMark class="-ml-[5px] size-7 self-center" />
       <span class="text-lg leading-7 font-medium tracking-tight">
-        ollaya
+        Meliclaw Systems One Model 2
         {/* vertical-align: middle centres the badge on the wordmark's x-height, whatever the font. */}
         <span
           class="ml-2 inline-block rounded-full border border-line-strong px-[7px] align-middle text-[11px] leading-[17px] font-medium tracking-normal text-muted"
-          title="Ollaya is new: expect rough edges, and please report what breaks on GitHub"
+          title="Meliclaw Systems One Model 2"
         >
           Beta
         </span>

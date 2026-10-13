@@ -88,7 +88,7 @@ export interface Backend {
 
 function tauri(): Backend {
   const t = window.__TAURI__
-  if (!t) throw new Error('not running inside the Ollaya app')
+  if (!t) throw new Error('not running inside Meliclaw Systems One Model 2')
   const invoke = t.core.invoke
   return {
     status: () => invoke('status'),

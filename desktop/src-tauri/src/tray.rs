@@ -101,7 +101,7 @@ pub fn init(app: &AppHandle) -> tauri::Result<()> {
     TrayIconBuilder::with_id(TRAY)
         .icon(Image::from_bytes(ICON_ASLEEP)?)
         .icon_as_template(true)
-        .tooltip("Ollaya")
+        .tooltip("Meliclaw Systems One Model 2")
         .menu(&build_menu(app, &Snapshot::default())?.0)
         .show_menu_on_left_click(true)
         .on_menu_event(on_menu_event)
@@ -230,9 +230,9 @@ fn redraw(app: &AppHandle, s: Snapshot, drawn: &mut Option<Drawn>) {
         let _ = tray.set_icon_with_as_template(Some(image), true);
     }
     let tip = if s.running {
-        format!("Ollaya {} is running at {}", s.version, s.url)
+        format!("Meliclaw Systems One Model 2 {} is running at {}", s.version, s.url)
     } else {
-        "Ollaya is stopped".to_owned()
+        "Meliclaw Systems One Model 2 is stopped".to_owned()
     };
     let _ = tray.set_tooltip(Some(tip));
     *drawn = Some(Drawn { shown: s, items });
@@ -266,7 +266,7 @@ fn build_menu(app: &AppHandle, s: &Snapshot) -> tauri::Result<(Menu<Wry>, Items)
 
     // The header's title is replaced by a view (`appkit::dress`).
     let mut menu = MenuBuilder::new(app)
-        .item(&MenuItemBuilder::with_id("header", "Ollaya").build(app)?)
+        .item(&MenuItemBuilder::with_id("header", "Meliclaw Systems One Model 2").build(app)?)
         .separator();
     menu = if s.running {
         menu.item(
@@ -340,13 +340,13 @@ fn build_menu(app: &AppHandle, s: &Snapshot) -> tauri::Result<(Menu<Wry>, Items)
         .item(&models.build()?)
         .separator()
         .item(
-            &MenuItemBuilder::with_id("open", "Open Ollaya…")
+            &MenuItemBuilder::with_id("open", "Open Meliclaw Systems One Model 2…")
                 .accelerator("CmdOrCtrl+O")
                 .build(app)?,
         )
         .item(&login)
         .separator()
-        .item(&PredefinedMenuItem::quit(app, Some("Quit Ollaya"))?);
+        .item(&PredefinedMenuItem::quit(app, Some("Quit Meliclaw Systems One Model 2"))?);
     let items = Items {
         models: installed,
         pulls,
@@ -777,7 +777,7 @@ mod appkit {
         view.addSubview(&switch);
 
         let text_width = HEADER_WIDTH - 2.0 * INSET - size.width - 8.0;
-        let title = NSTextField::labelWithString(&NSString::from_str("Ollaya"), mtm);
+        let title = NSTextField::labelWithString(&NSString::from_str("Meliclaw Systems One Model 2"), mtm);
         // SAFETY: a constant AppKit exports.
         title.setFont(Some(&NSFont::systemFontOfSize_weight(13.0, unsafe {
             NSFontWeightSemibold

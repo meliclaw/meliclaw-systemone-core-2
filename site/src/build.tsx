@@ -59,7 +59,7 @@ function pages(origin: string): Page[] {
       url: '/search',
       meta: {
         title: 'Models',
-        description: 'Open decision models you can run locally with Ollaya.',
+        description: 'Open decision models you can run locally with Meliclaw Systems One Model 2.',
         nav: 'models',
         hideNavSearch: true,
       },
@@ -69,7 +69,7 @@ function pages(origin: string): Page[] {
       url: '/download',
       meta: {
         title: 'Download',
-        description: 'Install Ollaya on Linux or macOS with one command, or run the Docker image.',
+        description: 'Install Meliclaw Systems One Model 2 on Linux or macOS with one command, or run the Docker image.',
         nav: 'download',
       },
       render: () => <DownloadPage origin={origin} />,
@@ -78,7 +78,7 @@ function pages(origin: string): Page[] {
       url: '/docs',
       meta: {
         title: 'Docs',
-        description: 'Ollaya documentation: quickstart, CLI, REST API, Modelfile and TypeSafe compatibility.',
+        description: 'Meliclaw Systems One Model 2 documentation: quickstart, CLI, REST API, Modelfile and TypeSafe compatibility.',
         nav: 'docs',
       },
       render: () => <DocsIndex />,
