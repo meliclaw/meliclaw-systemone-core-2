@@ -1,4 +1,4 @@
-// Ollaya desktop: the server's status and switch, the model library with downloads, and a panel to
+// Meliclaw Systems One Model 2 desktop: the server's status and switch, the model library with downloads, and a panel to
 // run a model on a text or JSON state. Plain DOM, rendered from one state object.
 import { backend, type Answer, type DecideResponse, type LibraryModel, type Preset, type Status } from './backend'
 
@@ -229,7 +229,7 @@ function header(): HTMLElement {
       'div',
       { class: 'flex items-center gap-2 text-fg' },
       icon(OWL, '-ml-[4px] size-6'),
-      h('span', { class: 'text-[17px] leading-6 font-medium tracking-tight' }, 'ollaya'),
+      h('span', { class: 'text-[17px] leading-6 font-medium tracking-tight' }, 'Meliclaw Systems One Model 2'),
       h('span', { class: 'rounded-full border border-line-strong px-[7px] text-[11px] leading-[17px] font-medium text-muted' }, 'Beta'),
     ),
     h(

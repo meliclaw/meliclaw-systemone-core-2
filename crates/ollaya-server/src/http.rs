@@ -281,6 +281,9 @@ async fn tags(State(s): State<Arc<AppState>>) -> ApiResult<Json<TagsResponse>> {
         .iter()
         .map(|e| views::local_model(s.store(), e))
         .collect();
+    if s.ollaya.remote_enabled() {
+        models.extend(crate::remote::REMOTE_MODELS.iter().map(views::remote_model));
+    }
     models.sort_by(|a, b| {
         b.modified_at
             .cmp(&a.modified_at)
@@ -308,6 +311,13 @@ async fn v1_models(State(s): State<Arc<AppState>>) -> ApiResult<Json<ModelList>>
         .iter()
         .map(|e| views::model_metadata(s.store(), e))
         .collect();
+    if s.ollaya.remote_enabled() {
+        models.extend(
+            crate::remote::REMOTE_MODELS
+                .iter()
+                .map(views::remote_metadata),
+        );
+    }
     models.sort_by(|a, b| a.name.cmp(&b.name));
     Ok(Json(ModelList { models }))
 }
@@ -315,6 +325,11 @@ async fn v1_models(State(s): State<Arc<AppState>>) -> ApiResult<Json<ModelList>>
 async fn show(State(s): State<Arc<AppState>>, body: Body) -> ApiResult<Response> {
     let req = parse(body, validate::show_request).await?;
     names([("model", &req.model)])?;
+    if s.ollaya.remote_enabled()
+        && let Some(remote) = crate::remote::lookup(&req.model)
+    {
+        return Ok(Json(views::remote_show(remote)).into_response());
+    }
     let info = s.ollaya.show(&req.model).map_err(|e| api_error(&e))?;
     Ok(Json(views::show(s.store(), &info)).into_response())
 }
@@ -843,7 +858,7 @@ pub fn build(config: ServerConfig, runner: RunnerLaunch) -> Result<Arc<AppState>
         llama_dir: runner.llama_dir,
         cpu_exe: runner.cpu_exe,
     });
-    let ollaya = Ollaya::new(store, scheduler)?;
+    let ollaya = Ollaya::new(store, scheduler, config.openrouter_api_key.clone())?;
     Ok(AppState::new(ollaya, config))
 }
 

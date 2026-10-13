@@ -13,7 +13,7 @@ export function SearchPage() {
   return (
     <div class="mx-auto max-w-2xl px-4 pt-8 pb-8 md:px-6 md:pt-12">
       <h1 class="text-[28px] font-medium tracking-tight text-fg">Models</h1>
-      <p class="mt-1 text-[15px] text-muted">Open decision models you can run locally with Ollaya.</p>
+      <p class="mt-1 text-[15px] text-muted">Open decision models you can run locally with Meliclaw Systems One Model 2.</p>
       <form id="search-form" action="/search" method="get" role="search" class="mt-6" data-search-form>
         <div class="relative">
           <label for="search-q" class="sr-only">

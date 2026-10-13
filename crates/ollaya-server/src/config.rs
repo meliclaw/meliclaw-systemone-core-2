@@ -34,6 +34,10 @@ pub struct ServerConfig {
     pub origins: Vec<String>,
     /// `OLLAYA_LOG_DIR`: when set, the daemon logs to `<dir>/server.log` instead of stderr.
     pub log_dir: Option<PathBuf>,
+    /// `OPENROUTER_API_KEY`: when set, the OpenRouter-backed remote models
+    /// (`crate::remote::REMOTE_MODELS`) are listed and answer; otherwise they are hidden and
+    /// `/api/decide`/`/v1/systemone` reject requests for them.
+    pub openrouter_api_key: Option<String>,
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -146,6 +150,7 @@ impl ServerConfig {
                 })
                 .unwrap_or_default(),
             log_dir: var("OLLAYA_LOG_DIR").map(PathBuf::from),
+            openrouter_api_key: var("OPENROUTER_API_KEY"),
         })
     }
 }
@@ -174,6 +179,7 @@ mod tests {
         assert_eq!(c.device, "auto");
         assert!(c.api_key.is_none() && c.origins.is_empty());
         assert!(c.log_dir.is_none());
+        assert!(c.openrouter_api_key.is_none());
     }
 
     #[test]
@@ -192,6 +198,7 @@ mod tests {
                 "https://*.example.com, chrome-extension://*",
             ),
             ("OLLAYA_LOG_DIR", "/var/log/ollaya"),
+            ("OPENROUTER_API_KEY", "sk-or-v1-test"),
         ])
         .unwrap();
         assert_eq!(c.host.bind_addr(), "0.0.0.0:9000");
@@ -203,6 +210,7 @@ mod tests {
         assert_eq!(c.api_key.as_deref(), Some("secret"));
         assert_eq!(c.origins, ["https://*.example.com", "chrome-extension://*"]);
         assert_eq!(c.log_dir, Some(PathBuf::from("/var/log/ollaya")));
+        assert_eq!(c.openrouter_api_key.as_deref(), Some("sk-or-v1-test"));
     }
 
     #[test]

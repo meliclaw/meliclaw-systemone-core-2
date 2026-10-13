@@ -51,7 +51,7 @@ function DesktopApp({ file, label, extra, note }: { file: string; label: string;
       </div>
       <Note>
         Start and stop the server, download models and try them, in one window. Your code talks to the same local API;
-        for the <code class="font-mono">ollaya</code> command, install the command line too.
+        for the <code class="font-mono">meliclaw-systemone</code> command, install the command line too.
       </Note>
       {note && <Note>{note}</Note>}
     </Step>
@@ -79,7 +79,7 @@ export function DownloadPage({ origin }: { origin: string }) {
 
   return (
     <div class="mx-auto max-w-2xl px-4 pt-12 md:px-6 md:pt-20">
-      <h1 class="text-center text-4xl font-medium tracking-tight text-fg md:text-5xl">Download Ollaya</h1>
+      <h1 class="text-center text-4xl font-medium tracking-tight text-fg md:text-5xl">Download Meliclaw Systems One Model 2</h1>
       <p class="mt-4 text-center text-lg text-body">A desktop app and a command line for macOS, Windows and Linux, or a Docker image.</p>
 
       <div class="mt-10">
@@ -111,7 +111,7 @@ export function DownloadPage({ origin }: { origin: string }) {
                 <a href={RELEASES_URL} class={textLink}>
                   GitHub
                 </a>
-                , checks its sha256 and, where systemd runs, sets up the <code class="font-mono">ollaya</code>{' '}
+                , checks its sha256 and, where systemd runs, sets up the <code class="font-mono">meliclaw-systemone</code>{' '}
                 service. With a GPU it also fetches the CUDA libraries (1 to 1.6 GB). It never installs drivers.
               </Note>
             </Step>
@@ -119,7 +119,7 @@ export function DownloadPage({ origin }: { origin: string }) {
               <CodeBlock code="ollaya run winnow:e4b" />
               <Note>
                 The recommended model: close to Jev's accuracy, in about 90 ms on an NVIDIA GPU with 10 GB or more (an 8 GB
-                download). Otherwise, <code class="font-mono">ollaya run laya</code> answers in a fraction of a second, on the
+                download). Otherwise, <code class="font-mono">meliclaw-systemone run laya</code> answers in a fraction of a second, on the
                 CPU too.
               </Note>
             </Step>
@@ -130,10 +130,10 @@ export function DownloadPage({ origin }: { origin: string }) {
               ]}
             />
             <DesktopApp
-              file="Ollaya-linux-x86_64.AppImage"
+              file="Meliclaw-Systems-One-Model-2-linux-x86_64.AppImage"
               label="Download the AppImage"
               extra={
-                <a href={`${LATEST_DOWNLOAD}/Ollaya-linux-amd64.deb`} class={`text-sm ${textLink}`}>
+                <a href={`${LATEST_DOWNLOAD}/Meliclaw-Systems-One-Model-2-linux-amd64.deb`} class={`text-sm ${textLink}`}>
                   or the .deb
                 </a>
               }
@@ -142,7 +142,7 @@ export function DownloadPage({ origin }: { origin: string }) {
 
           <Panel id="windows" selected={selected}>
             <DesktopApp
-              file="Ollaya-windows-x64-setup.exe"
+              file="Meliclaw-Systems-One-Model-2-windows-x64-setup.exe"
               label="Download for Windows"
               note={
                 WINDOWS_APP_SIGNED
@@ -153,7 +153,7 @@ export function DownloadPage({ origin }: { origin: string }) {
             <Step title="Command line">
               <CodeBlock code={installWindows} lang="powershell" />
               <Note>
-                In PowerShell. It installs <code class="font-mono">ollaya</code> for your user, with no administrator
+                In PowerShell. It installs <code class="font-mono">meliclaw-systemone</code> for your user, with no administrator
                 rights, and puts it on your <code class="font-mono">PATH</code>. The archives are checked against the
                 release's sha256. With an NVIDIA GPU it also fetches the CUDA libraries (about 1 GB). It never installs
                 drivers.
@@ -163,7 +163,7 @@ export function DownloadPage({ origin }: { origin: string }) {
               <CodeBlock code="ollaya run winnow:e4b" />
               <Note>
                 The recommended model: close to Jev's accuracy, in about 90 ms on an NVIDIA GPU with 10 GB or more (an 8 GB
-                download). Otherwise, <code class="font-mono">ollaya run laya</code> answers in a fraction of a second, on the
+                download). Otherwise, <code class="font-mono">meliclaw-systemone run laya</code> answers in a fraction of a second, on the
                 CPU too.
               </Note>
             </Step>
@@ -180,7 +180,7 @@ export function DownloadPage({ origin }: { origin: string }) {
           </Panel>
 
           <Panel id="macos" selected={selected}>
-            <DesktopApp file="Ollaya-macos-arm64.dmg" label="Download for macOS" />
+            <DesktopApp file="Meliclaw-Systems-One-Model-2-macos-arm64.dmg" label="Download for macOS" />
             <Step title="Command line">
               <CodeBlock code={install} />
               <Note>
@@ -188,8 +188,8 @@ export function DownloadPage({ origin }: { origin: string }) {
                 <a href={RELEASES_URL} class={textLink}>
                   GitHub
                 </a>{' '}
-                and checks its sha256. Start the server with <code class="font-mono">ollaya serve</code>, or let{' '}
-                <code class="font-mono">ollaya run</code> start it for you.
+                and checks its sha256. Start the server with <code class="font-mono">meliclaw-systemone serve</code>, or let{' '}
+                <code class="font-mono">meliclaw-systemone run</code> start it for you.
               </Note>
             </Step>
             <Step title="Run a model">
@@ -214,7 +214,7 @@ export function DownloadPage({ origin }: { origin: string }) {
             </Step>
             <Note>
               The CPU image is built for linux/amd64 and linux/arm64, the <code class="font-mono">:cuda</code> and{' '}
-              <code class="font-mono">:cuda12</code> images for linux/amd64. Models are kept in the <code class="font-mono">ollaya</code> volume.
+              <code class="font-mono">:cuda12</code> images for linux/amd64. Models are kept in the <code class="font-mono">meliclaw-systemone</code> volume.
             </Note>
           </Panel>
         </div>

@@ -13,6 +13,7 @@ use tokio::sync::broadcast;
 
 use crate::Error;
 use crate::models::{Loadable, Resolved, resolve, resolve_entry};
+use crate::remote::{self, OpenRouterClient};
 use crate::scheduler::{KeepAlive, RunningInfo, Scheduler};
 
 /// TypeSafe's limits, enforced for every model.
@@ -27,6 +28,8 @@ pub struct Ollaya {
     pulls: Mutex<HashMap<String, broadcast::Sender<PullEvent>>>,
     /// Model names a create is writing. Lock order: `pulls`, then `creating`.
     creating: Mutex<HashSet<String>>,
+    /// `OPENROUTER_API_KEY`'s client, when set: answers `remote::REMOTE_MODELS`.
+    openrouter: Option<OpenRouterClient>,
 }
 
 #[derive(Debug, Clone)]
@@ -99,7 +102,11 @@ pub struct ModelInfo {
 }
 
 impl Ollaya {
-    pub fn new(store: Store, scheduler: Arc<Scheduler>) -> Result<Arc<Self>, Error> {
+    pub fn new(
+        store: Store,
+        scheduler: Arc<Scheduler>,
+        openrouter_api_key: Option<String>,
+    ) -> Result<Arc<Self>, Error> {
         let puller = Puller::new(store.clone())?.with_check(scheduler.run_check());
         Ok(Arc::new(Ollaya {
             store,
@@ -107,11 +114,15 @@ impl Ollaya {
             scheduler,
             pulls: Mutex::new(HashMap::new()),
             creating: Mutex::new(HashSet::new()),
+            openrouter: openrouter_api_key.map(OpenRouterClient::new),
         }))
     }
 
     pub async fn decide(&self, input: DecideInput) -> Result<DecideOutput, Error> {
         let started = Instant::now();
+        if let Some(remote) = remote::lookup(&input.model) {
+            return self.decide_remote(remote, input, started).await;
+        }
         let name = ModelName::parse(&input.model)?;
         let mut baked = None;
         let (model, routing) = match resolve(&self.store, &name)? {
@@ -197,6 +208,50 @@ impl Ollaya {
         })
     }
 
+    /// Answer a request against an OpenRouter-backed [`remote::RemoteModel`], bypassing the
+    /// store and scheduler entirely: OpenRouter already returns calibrated, typed answers.
+    async fn decide_remote(
+        &self,
+        remote: &remote::RemoteModel,
+        input: DecideInput,
+        started: Instant,
+    ) -> Result<DecideOutput, Error> {
+        let client = self.openrouter.as_ref().ok_or_else(|| {
+            Error::Unsupported(format!(
+                "{} is served via OpenRouter; set OPENROUTER_API_KEY to use it",
+                remote.name
+            ))
+        })?;
+        let questions_json = input
+            .questions
+            .ok_or_else(|| Error::NoQuestions(remote.name.to_string()))?;
+        let questions =
+            parse_questions(&questions_json).map_err(|e| Error::InvalidRequest(e.to_string()))?;
+        check_limits(&questions)?;
+        let eval_started = Instant::now();
+        let answers = client
+            .decide(
+                remote.openrouter_id,
+                &input.state,
+                &questions,
+                &questions_json,
+            )
+            .await?;
+        Ok(DecideOutput {
+            requested: remote.name.to_string(),
+            model: remote.name.to_string(),
+            questions,
+            answers,
+            input_tokens: 0,
+            state_tokens: 0,
+            state_truncated: false,
+            routing: None,
+            load_duration: Duration::ZERO,
+            eval_duration: eval_started.elapsed(),
+            total_duration: started.elapsed(),
+        })
+    }
+
     /// Load a model without answering anything (`ollaya run` warm-up), or unload it with
     /// `KeepAlive::For(0)`. Returns the time spent loading.
     pub async fn preload(
@@ -233,6 +288,12 @@ impl Ollaya {
     /// Pull a model, streaming progress. Concurrent pulls of one model share a single download;
     /// when every receiver is gone, the pull stops (partial blobs stay for the next pull).
     pub fn pull(self: &Arc<Self>, model: &str) -> Result<broadcast::Receiver<PullEvent>, Error> {
+        if let Some(remote) = remote::lookup(model) {
+            return Err(Error::InvalidRequest(format!(
+                "{} is served remotely via OpenRouter; there is nothing to pull",
+                remote.name
+            )));
+        }
         let name = ModelName::parse(model)?;
         let key = name.to_string();
         let mut pulls = self.pulls.lock().unwrap();
@@ -294,6 +355,12 @@ impl Ollaya {
 
     /// Remove a model; it is unloaded first. Returns false if it was not present.
     pub async fn delete(&self, model: &str) -> Result<bool, Error> {
+        if let Some(remote) = remote::lookup(model) {
+            return Err(Error::InvalidRequest(format!(
+                "{} is served remotely via OpenRouter; there is nothing to delete",
+                remote.name
+            )));
+        }
         let name = ModelName::parse(model)?;
         if self.is_busy(&name) {
             return Err(Error::Busy(name.to_string()));
@@ -427,6 +494,11 @@ impl Ollaya {
 
     pub fn running(&self) -> Vec<RunningInfo> {
         self.scheduler.running()
+    }
+
+    /// Whether `OPENROUTER_API_KEY` is set, so `remote::REMOTE_MODELS` should be listed.
+    pub fn remote_enabled(&self) -> bool {
+        self.openrouter.is_some()
     }
 }
 

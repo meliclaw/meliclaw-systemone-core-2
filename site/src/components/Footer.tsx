@@ -12,7 +12,7 @@ export function Footer() {
   return (
     <footer class="mt-24 border-t border-line">
       <div class="mx-auto flex max-w-6xl flex-col-reverse gap-4 px-4 py-8 text-xs text-muted sm:flex-row sm:items-center sm:justify-between md:px-6">
-        <p>© {COPYRIGHT_YEAR} Ollaya</p>
+        <p>© {COPYRIGHT_YEAR} Meliclaw</p>
         <nav aria-label="Footer">
           <ul class="flex flex-wrap gap-x-5 gap-y-2">
             {links.map((l) => (
